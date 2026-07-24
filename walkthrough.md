@@ -1,3 +1,6 @@
+# To run the application, execute:
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+
 # Walkthrough - Nested Category & Bird Name Directory Mapping
 
 We updated the bioacoustic training & classification pipeline to support nested directory hierarchies: `./data/train/<bird_category>/<bird_name>/*.mp3`.
