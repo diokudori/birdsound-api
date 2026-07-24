@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bioacoustic Bird Vocalization Classifier & Similarity Engine</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="p-4 md:p-8">
+
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Top Header Navigation Bar -->
+    <header class="glass-card rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-300 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <!-- Bird Icon SVG -->
+          <svg class="w-7 h-7 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M22 6c0-1.1-.9-2-2-2h-3.5c-.8 0-1.5.4-1.9 1.1L12.7 8H9.3l-1.9-2.9C7 4.4 6.3 4 5.5 4H2c-1.1 0-2 .9-2 2s.9 2 2 2h2.2l2.6 4H2c-1.1 0-2 .9-2 2s.9 2 2 2h6.2l3.4 5.1c.4.7 1.1 1.1 1.9 1.1H17c1.1 0 2-.9 2-2v-3.5c0-.8-.4-1.5-1.1-1.9L16 12.7V9.3l2.9-1.9c.7-.4 1.1-1.1 1.1-1.9V6z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold font-heading text-white tracking-wide">AvesAcoustic AI</h1>
+          <p class="text-xs text-emerald-300 font-medium">Bioacoustic Feature Extraction & Audio Similarity Classifier</p>
+        </div>
+      </div>
+
+      <!-- Status Indicator Pill -->
+      <div class="flex items-center space-x-3 bg-slate-900/60 border border-slate-800 rounded-full px-4 py-2">
+        <span id="model-status-dot" class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="model-status-text" class="text-xs font-semibold text-slate-300">Checking Model State...</span>
+      </div>
+    </header>
+
+    <!-- Main Grid Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- LEFT COLUMN: Audio Inputs (Recorder + Dropzone) -->
+      <section class="lg:col-span-5 space-y-6">
+        
+        <!-- Audio Input Card -->
+        <div class="glass-card rounded-2xl p-6 space-y-6">
+          
+          <!-- Tab Navigation -->
+          <div class="flex border-b border-slate-800 pb-3">
+            <button id="tab-mic-btn" class="flex-1 text-center py-2 font-semibold text-emerald-400 border-b-2 border-emerald-400 transition-colors flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+              </svg>
+              <span>Live Microphone</span>
+            </button>
+            <button id="tab-file-btn" class="flex-1 text-center py-2 font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition-colors flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+              </svg>
+              <span>Upload Audio</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: Live Mic Recorder -->
+          <div id="tab-mic-content" class="space-y-5">
+            <div class="relative bg-slate-950/80 rounded-xl p-4 border border-slate-800 flex flex-col items-center justify-center space-y-4 min-h-[160px]">
+              
+              <!-- Waveform Visualizer Canvas -->
+              <canvas id="visualizer-canvas" class="w-full h-24 rounded-lg bg-slate-900/50 hidden"></canvas>
+              
+              <div id="mic-idle-state" class="text-center space-y-2">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                  </svg>
+                </div>
+                <p class="text-sm text-slate-400">Click Record to capture bird call via microphone</p>
+              </div>
+
+              <!-- Timer Display -->
+              <div id="rec-timer" class="text-2xl font-mono font-bold text-emerald-400 hidden">00:00</div>
+            </div>
+
+            <!-- Mic Controls -->
+            <div class="flex items-center gap-3">
+              <button id="record-start-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/20">
+                <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+                <span>Start Recording</span>
+              </button>
+              <button id="record-stop-btn" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/20 hidden">
+                <span class="w-3 h-3 rounded-sm bg-white"></span>
+                <span>Stop Recording</span>
+              </button>
+            </div>
+
+            <!-- Recorded Preview Player -->
+            <div id="mic-preview-container" class="space-y-3 hidden">
+              <audio id="mic-audio-player" controls class="w-full rounded-lg"></audio>
+              <button id="classify-mic-btn" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2">
+                <span>Classify Recorded Vocalization</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB 2: File Upload Dropzone -->
+          <div id="tab-file-content" class="space-y-5 hidden">
+            <div id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/60 bg-slate-950/40 rounded-xl p-6 text-center cursor-pointer transition-all space-y-3">
+              <input type="file" id="file-input" accept="audio/*" class="hidden" />
+              <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-emerald-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-200">Drag & Drop audio file here</p>
+                <p class="text-xs text-slate-400 mt-1">Supports WAV, MP3, OGG, WebM, FLAC</p>
+              </div>
+            </div>
+
+            <!-- File Selected Preview Container -->
+            <div id="file-preview-container" class="space-y-3 hidden">
+              <div class="flex items-center justify-between bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                  <span class="text-emerald-400">🎵</span>
+                  <span id="selected-filename" class="text-xs font-semibold text-slate-300 truncate max-w-[200px]">sample.mp3</span>
+                </div>
+                <span id="selected-filesize" class="text-xs text-slate-400">0 KB</span>
+              </div>
+              <audio id="file-audio-player" controls class="w-full rounded-lg"></audio>
+              <button id="classify-file-btn" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2">
+                <span>Classify Uploaded Vocalization</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- MIDDLE/RIGHT COLUMN: Results & Similarity Meters -->
+      <section class="lg:col-span-4 space-y-6">
+        
+        <div class="glass-card rounded-2xl p-6 space-y-6">
+          <h2 class="text-lg font-bold font-heading text-white flex items-center justify-between">
+            <span>Classification Results</span>
+            <span class="text-xs font-normal text-slate-400">Cosine Similarity</span>
+          </h2>
+
+          <!-- TOP MATCH CARD -->
+          <div id="top-match-card" class="bg-gradient-to-br from-emerald-950/80 to-slate-900 rounded-xl p-5 border border-emerald-500/30 space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <span id="top-match-category-badge" class="text-xs font-bold text-teal-300 bg-teal-950/80 px-2.5 py-0.5 rounded border border-teal-500/30 uppercase tracking-wider">Category</span>
+              <span id="top-match-badge" class="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">0.00%</span>
+            </div>
+            <div>
+              <h3 id="top-match-species" class="text-2xl font-extrabold text-white font-heading">Waiting for Audio</h3>
+              <p id="top-match-sub" class="text-xs text-slate-400 mt-1">Upload audio or record to analyze bioacoustic features</p>
+            </div>
+          </div>
+
+          <!-- ALL SPECIES RANKED PROGRESS LIST -->
+          <div class="space-y-4">
+            <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Similarity Profile Breakdown</h4>
+            
+            <div id="similarity-list" class="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+              <p class="text-sm text-slate-500 italic text-center py-6">No classification data yet.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: Dataset & Model Control Panel -->
+      <section class="lg:col-span-3 space-y-6">
+        
+        <div class="glass-card rounded-2xl p-6 space-y-5">
+          <h2 class="text-lg font-bold font-heading text-white">Model Management</h2>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-400 block">Profiles</span>
+              <span id="stat-species-count" class="text-xl font-bold text-emerald-400">0</span>
+            </div>
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-400 block">Audio Files</span>
+              <span id="stat-samples-count" class="text-xl font-bold text-teal-400">0</span>
+            </div>
+          </div>
+
+          <!-- Categories List -->
+          <div>
+            <span class="text-xs font-semibold text-slate-400 block mb-2">Detected Categories:</span>
+            <div id="categories-badges" class="flex flex-wrap gap-1.5">
+              <span class="text-xs text-slate-500">None</span>
+            </div>
+          </div>
+
+          <hr class="border-slate-800">
+
+          <!-- Controls -->
+          <div class="space-y-3">
+            <button id="train-model-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 font-semibold py-3 px-4 rounded-xl border border-emerald-500/30 transition-all flex items-center justify-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>Retrain Model on Dataset</span>
+            </button>
+
+            <button id="generate-samples-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium py-2.5 px-4 rounded-xl border border-slate-800 transition-all flex items-center justify-center space-x-2">
+              <span>⚡ Generate Demo Dataset</span>
+            </button>
+          </div>
+
+          <div class="text-[11px] text-slate-400 leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-800/80 space-y-1">
+            <p class="font-semibold text-slate-300">Feature Dimensions (44-dim):</p>
+            <p>• 20 MFCC Means & 20 Stds</p>
+            <p>• Spectral Centroid Mean & Std</p>
+            <p>• Spectral Rolloff & Zero Crossing Rate</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Overlay -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+  <!-- JavaScript App Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
