@@ -10,6 +10,7 @@ from fastapi.concurrency import run_in_threadpool
 from backend.trainer import train_model, DATA_DIR, MODEL_PATH
 from backend.classifier import classifier_instance
 from scripts.generate_sample_data import generate_all_samples
+from scripts.map_grades import match_birds
 
 app = FastAPI(
     title="Bioacoustic Bird Vocalization Classifier",
@@ -38,6 +39,7 @@ async def startup_event():
             if not os.path.exists(DATA_DIR) or not os.listdir(DATA_DIR):
                 generate_all_samples(DATA_DIR)
             await run_in_threadpool(train_model, DATA_DIR, MODEL_PATH)
+            await run_in_threadpool(match_birds)
             classifier_instance.load_model()
             print("[*] Model training complete.")
         except Exception as e:
@@ -91,6 +93,7 @@ async def trigger_training():
             generate_all_samples(DATA_DIR)
 
         payload = await run_in_threadpool(train_model, DATA_DIR, MODEL_PATH)
+        await run_in_threadpool(match_birds)
         classifier_instance.load_model()
         return {
             "success": True,
@@ -130,7 +133,7 @@ async def classify_audio(file: UploadFile = File(...)):
 
     try:
         audio_stream = io.BytesIO(content)
-        result = await run_in_threadpool(classifier_instance.classify_audio, audio_stream)
+        result = await run_in_threadpool(classifier_instance.classify_audio_multi, audio_stream)
         return result
     except RuntimeError as re:
         raise HTTPException(status_code=400, detail=str(re))

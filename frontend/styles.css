@@ -1,30 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
 
 :root {
-  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #064e3b 50%, #022c22 100%);
-  --card-bg: rgba(15, 23, 42, 0.75);
-  --card-border: rgba(52, 211, 153, 0.15);
-  --glass-glow: 0 8px 32px 0 rgba(16, 185, 129, 0.12);
+  --bg-color: #0c1524;      /* Flat deep navy blue background */
+  --card-bg: #162235;       /* Flat slate blue card bg */
+  --card-border: #23354f;   /* Flat blue-gray borders */
+  --card-glow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
 }
 
 body {
   font-family: 'Outfit', sans-serif;
-  background: var(--bg-gradient);
-  color: #f8fafc;
+  background: var(--bg-color);
+  color: #f1f5f9;
   min-height: 100vh;
+  overflow: hidden; /* Prevent viewport level scrollbars */
 }
 
 .font-heading {
   font-family: 'Space Grotesk', sans-serif;
 }
 
-/* Glassmorphism Card */
+/* Flat Glassmorphism Card */
 .glass-card {
   background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
-  box-shadow: var(--glass-glow);
+  box-shadow: var(--card-glow);
 }
 
 .glass-card-hover {
@@ -32,8 +31,8 @@ body {
 }
 
 .glass-card-hover:hover {
-  border-color: rgba(52, 211, 153, 0.35);
-  box-shadow: 0 12px 40px 0 rgba(16, 185, 129, 0.22);
+  border-color: #3b82f6;
+  box-shadow: 0 8px 24px 0 rgba(59, 130, 246, 0.15);
   transform: translateY(-2px);
 }
 
@@ -49,18 +48,92 @@ body {
 
 /* Dropzone active effect */
 .dropzone-active {
-  border-color: #34d399 !important;
-  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.08) !important;
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
+/* Hide scrollbars while maintaining scrollability */
+.custom-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+
+.custom-scrollbar,
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
-::-webkit-scrollbar-thumb {
-  background: #059669;
-  border-radius: 3px;
+
+/* ==========================================
+   Green Theme Config Override (represents nature/growth)
+   ========================================== */
+body.theme-green {
+  --bg-color: #08120e;      /* Flat deep green background */
+  --card-bg: #11221b;       /* Flat slate green card bg */
+  --card-border: #1a352a;   /* Flat green-gray borders */
+}
+
+/* Override Blue Tailwind classes to Emerald/Green */
+body.theme-green .bg-blue-600 {
+  background-color: #059669 !important; /* Emerald-600 */
+}
+body.theme-green .hover\:bg-blue-500:hover {
+  background-color: #10b981 !important; /* Emerald-500 */
+}
+body.theme-green .text-blue-400 {
+  color: #34d399 !important; /* Emerald-400 */
+}
+body.theme-green .text-blue-300 {
+  color: #6ee7b7 !important; /* Emerald-300 */
+}
+body.theme-green .border-blue-400 {
+  border-color: #34d399 !important;
+}
+body.theme-green .bg-blue-500\/10 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+body.theme-green .border-blue-500\/30 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+body.theme-green .bg-blue-500\/20 {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+}
+body.theme-green .bg-blue-950\/20 {
+  background-color: rgba(6, 78, 59, 0.25) !important;
+}
+body.theme-green .bg-blue-950\/80 {
+  background-color: rgba(6, 78, 59, 0.8) !important;
+}
+body.theme-green .border-blue-500\/20 {
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+body.theme-green .shadow-blue-600\/20 {
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2), 0 4px 6px -2px rgba(16, 185, 129, 0.1) !important;
+}
+body.theme-green .hover\:border-blue-500\/30:hover {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+body.theme-green .hover\:border-blue-500\/60:hover {
+  border-color: rgba(16, 185, 129, 0.6) !important;
+}
+body.theme-green .bg-blue-900\/90 {
+  background-color: rgba(6, 78, 59, 0.9) !important;
+}
+body.theme-green .border-blue-500 {
+  border-color: #10b981 !important;
+}
+body.theme-green .text-blue-200 {
+  color: #a7f3d0 !important; /* Emerald-200 */
+}
+body.theme-green .border-blue-800 {
+  border-color: #064e3b !important;
+}
+body.theme-green .bg-blue-900\/40 {
+  background-color: rgba(6, 78, 59, 0.4) !important;
+}
+body.theme-green #score-circle-progress {
+  stroke: #10b981 !important;
+}
+body.theme-green #theme-switch-btn {
+  color: #34d399 !important;
 }
